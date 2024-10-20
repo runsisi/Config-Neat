@@ -129,7 +129,7 @@ sub parse {
         my ($o, $no_default_param) = @_;
 
         if ($o->{key} ne '') {
-            push @{$o->{values}}, 'YES' if !$no_default_param && scalar(@{$o->{values}}) == 0;
+            push @{$o->{values}}, undef if !$no_default_param && scalar(@{$o->{values}}) == 0;
             my $current_ctx = $o->{context}->[$#{$o->{context}}];
             my $data = $o->{context_data}->[$#{$o->{context_data}}];
             if (exists $current_ctx->{$o->{key}}) {

@@ -88,7 +88,7 @@ Default value: C<1> (true)
 
 =item B<< align_all >>
 
-If true, align all values in the configuration file
+if undef, no align at all. If false, no align at all. If true, align all values in the configuration file
 (otherwise the values are aligned only within current block).
 
 Default value: C<1> (true)
@@ -129,6 +129,8 @@ The output will be:
 =item B<< undefined_value >>
 
 A string representation of the value to emit for undefined values
+
+If undef, no value to emit.
 
 Default value: C<'NO'>
 
@@ -204,12 +206,14 @@ sub new {
 
         brace_under     =>  1, # if true, put the opening brace under the key name, not on the same line
         separate_blocks =>  1, # if true, surrond blocks with empty lines for better readability
-        align_all       =>  1, # if true, align all values in the configuration file
+        align_all       =>  1, # if undef, no align at all
+                               # if true, align all values in the configuration file
                                # (otherwise the values are aligned only within current block)
 
         sort            => undef, # can be a true value if you want to sort keys alphabetically
                                   # or a reference to an array with an ordered list of key names
         undefined_value => 'NO'   # default value to emit for undefined values
+                                  # If undef, no value to emit
     };
 
     $options = {} unless $options;
@@ -357,6 +361,7 @@ sub render {
 
         if (!defined $scalar) {
             $scalar = $options->{undefined_value};
+            return '' if !defined($scalar);
         }
 
         if ($scalar eq '') {
@@ -382,7 +387,7 @@ sub render {
     }
 
     sub render_key_val {
-        my ($options, $key_length, $indent, $wasref, $array_mode, $sequential_keys, $key, $val) = @_;
+        my ($options, $key_length, $indent, $wasref, $array_mode, $sequential_keys, $key, $val, $brace_inline) = @_;
 
         my $text = '';
         my $space_indent = (' ' x $indent);
@@ -411,13 +416,14 @@ sub render {
 
             $text .= $space_indent .
                      pad($key, $key_length - $indent) .
-                     (' ' x $options->{key_spacing}) .
+                     (' ' x ((scalar(@{$val}) == 1 && !defined($val->[0]) && !defined($options->{undefined_value})) ? 0 : $options->{key_spacing})) .
                      render_wrapped_array(\@a, $options, $key_length + $options->{key_spacing}) .
-                     "\n";
+                     ($brace_inline ? ' ' : "\n");
 
             $$wasref = $PARAM;
 
         } elsif (is_neat_array($val)) {
+
             map {
                 $text .= render_key_val($options, $key_length, $indent, $wasref, $array_mode, $sequential_keys, $key, $_);
             } @$val;
@@ -431,8 +437,8 @@ sub render {
                     die "Only scalar or simple array can be rendered as a default node value";
                 }
                 $$wasref = $PARAM;
-                $text .= render_key_val($options, $key_length, $indent, $wasref, undef, $sequential_keys, $key, $default_value);
-                $text .= $space_indent;
+                $text .= render_key_val($options, $key_length, $indent, $wasref, undef, $sequential_keys, $key, $default_value, !$options->{brace_under});
+                $text .= $space_indent if $options->{brace_under};
             } else {
                 $text .= $space_indent;
 
@@ -471,7 +477,7 @@ sub render {
         if (is_hash($node)) {
             $array_mode = hash_has_only_sequential_keys($node);
             $sequential_keys = hash_has_sequential_keys($node);
-            $key_length = $options->{align_all} ? $options->{global_key_length} : max_key_length($node, $options, $indent);
+            $key_length = !defined($options->{align_all}) ? 0 : $options->{align_all} ? $options->{global_key_length} : max_key_length($node, $options, $indent);
 
         } else {
             die "Unsupported data type: '".ref($node)."'";
