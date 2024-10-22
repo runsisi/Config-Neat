@@ -1,9 +1,0 @@
-inc {
-    bar {
-        baz     123
-    }
-}
-
-foo {
-    @inherit    .#inc/bar
-}

@@ -1,5 +1,0 @@
-# infinite recursion loop
-inc
-{
-    @inherit    27.nconf#inc
-}

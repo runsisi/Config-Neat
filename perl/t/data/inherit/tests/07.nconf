@@ -1,7 +1,0 @@
-conf1 {
-    @inherit    ../inc/01.nconf
-}
-
-conf2 {
-    @inherit    ../inc/02.nconf
-}

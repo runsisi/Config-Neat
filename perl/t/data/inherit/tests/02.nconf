@@ -1,2 +1,0 @@
-@inherit    ../inc/01.nconf
-+foo         baz

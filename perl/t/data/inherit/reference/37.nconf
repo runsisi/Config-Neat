@@ -1,9 +1,0 @@
-name_2                           default_value
-{
-    1                            2
-
-    very_long_property_name_2    default_value
-    {
-        1                        2
-    }
-}

@@ -1,3 +1,0 @@
-foo {
-    @inherit    ../inc/04.nconf#foo ../inc/05.nconf#foo
-}

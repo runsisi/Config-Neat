@@ -46,7 +46,7 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
-use Config::Neat::Inheritable;
+use Config::Neat;
 use Config::Neat::Render;
 use Data::Dumper;
 use Getopt::Long;
@@ -67,10 +67,10 @@ error("Unsupported mode '$mode'") unless $mode =~ m/^(neat|dumper|json)$/;
 
 error("Multiple configuration files not allowed") unless $#ARGV == 0;
 
-my $cfg = Config::Neat::Inheritable->new();
+my $cfg = Config::Neat->new();
 my $data = $cfg->parse_file($ARGV[0]);
 
-my $r = Config::Neat::Render->new();
+my $r = Config::Neat::Render->new({indentation => 4, key_spacing => 1, brace_under => 0, align_all => undef, undefined_value => undef});
 if ($mode eq 'neat') {
     print $r->render($data);
 } elsif ($mode eq 'dumper') {
